@@ -1,0 +1,2 @@
+【1】一个类通过继承CCCopying，并覆写(override)其中的copyWithZone的方法，就可以实现深拷贝。(浅拷贝:指针赋值 深拷贝：值赋值)
+【2】
