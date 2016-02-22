@@ -1,2 +1,4 @@
 【1】一个类通过继承CCCopying，并覆写(override)其中的copyWithZone的方法，就可以实现深拷贝。(浅拷贝:指针赋值 深拷贝：值赋值)
-【2】
+【2】class/ Appdelegate : : private cocos2d::CCApplication （CCApplication 平台相关）
+【3】CCDisplayLinkDirector : public CCDirector 
+     static CCDisplayLinkDirector *s_SharedDirector = NULL;
