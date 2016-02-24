@@ -2,3 +2,4 @@
 【2】class/ Appdelegate : : private cocos2d::CCApplication （CCApplication 平台相关）
 【3】CCDisplayLinkDirector : public CCDirector 
      static CCDisplayLinkDirector *s_SharedDirector = NULL;
+ 【4】CCSprite使用了一个四元组ccV3F_C4B_T2F_Quad来存放四个顶点ccV3F_C4B_T2F，ccV3F_C4B_T2F包含了顶点的坐标、颜色和纹理坐标。

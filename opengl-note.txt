@@ -168,3 +168,113 @@ void gluLookAt(GLdouble eyex,GLdouble eyey,GLdouble eyez,
 /**************************************************************/
 纹理 :
 计算机图形学中，纹理指的是一张表示物体表面细节的位图。
+
+*blend
+把将要画上去的颜色称为“源颜色”，把原来的颜色称为“目标颜色”。OpenGL 会把源颜色和目标颜色各自取出，并乘以一个系数（源颜色乘以的系数称为“源因子”，目标颜色乘以的系数称为“目标因子”），然后相加，这样就得到了新的颜色。
+
+【1】
+void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid * pointer)
+参数：
+size：指定了每个顶点对应的坐标个数，只能是2,3,4中的一个，默认值是4
+type：指定了数组中每个顶点坐标的数据类型，可取常量:GL_BYTE, GL_SHORT,GL_FIXED,GL_FLOAT;
+stride:指定了连续顶点间的字节排列方式，如果为0，数组中的顶点就会被认为是按照紧凑方式排列的，默认值为0
+pointer:制订了数组中第一个顶点的首地址，默认值为0，对于我们的android，大家可以不用去管什么地址的，一般给一个IntBuffer就可以了。
+描述：
+当开始render的时候，glVertexPointer 用一个数组指定了每个顶点的坐标，
+
+【2】
+函数原型：GL_APICALL void GL_APIENTRY glDrawArrays (GLenum mode, GLint first, GLsizei count);
+相似功能的函数是 glDrawElements。
+参数说明：
+mode，绘制方式，OpenGL2.0以后提供以下参数：GL_POINTS、GL_LINES、GL_LINE_LOOP、GL_LINE_STRIP、GL_TRIANGLES、GL_TRIANGLE_STRIP、GL_TRIANGLE_FAN。
+first，从数组缓存中的哪一位开始绘制，一般为0。
+count，数组中顶点的数量。
+
+【3】
+索引数组(indices)
+
+glDrawElements函数用于循环调用glArrayElement,但需要定义一个索引的数组
+
+void glDrawElements( GLenum mode, GLsizei count,
+GLenum type, const GLvoid *indices）；
+其中：
+mode指定绘制图元的类型，它应该是下列值之一，GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES, GL_QUAD_STRIP, GL_QUADS, and GL_POLYGON.
+count为绘制图元的数量乘上一个图元的顶点数。
+type为索引值的类型，只能是下列值之一：GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, or GL_UNSIGNED_INT。
+indices：指向索引存贮位置的指针。
+
+示例5
+
+void drawTwoLineWithArray2()
+{
+    GLfloat data[]=  {1.0, 0.0, 0.0,25.0,25.0,
+                      1.0, 0.0, 0.0,100.0,100.0,
+                      0.0, 1.0, 0.0,120.0,120.0,
+                      0.0, 1.0, 0.0,200.0,200.0};
+    GLubyte index[]= {0,1,2,3} ;
+    
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(3,GL_FLOAT,5*sizeof(GLfloat),&data[0]);
+    glVertexPointer(2,GL_FLOAT,5*sizeof(GLfloat),&data[3]);
+    
+    glDrawElements(GL_LINES,4,GL_UNSIGNED_BYTE,index);
+    
+}
+
+【4】glArrayElement 函数指定用来呈现一个顶点的数组元素。
+【5】
+void glGenBuffers(GLsizei n, GLuint *buffers);
+//在buffers数组中返回当前n个未使用的名称，表示缓冲区对象
+GLboolean glIsBuffer(GLuint buffer);
+//判断是否是缓冲区对象
+
+code：
+glGenBuffers(3,buffers); //创建3块buffer
+glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);//先将第一块buffer绑定到当前
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);//将顶点数组放入这个buffer
+glVertexPointer(3, GL_FLOAT, 0, 0);//指定这个buffer的格式，3代表3个float值为一个顶点，第一个0代表跨度，这里数值是紧密排列的，最后一个是数组的入口地址*point，由于已经将buffer绑定到当前，所以填0
+glEnableClientState(GL_VERTEX_ARRAY);//使用这个buffer，一定不要忘记
+glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);//这里开始是将第二块buffer绑定到当前，上传color数据，和顶点的做法一样，不多赘述了
+glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+glColorPointer(3, GL_FLOAT, 0, 0);
+glEnableClientState(GL_COLOR_ARRAY);
+
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[2]);//将第三块buffer绑定到当前，用于上传存储顶点索引的数据，因此BUFFER类型变更为GL_ELEMENT_ARRAY_BUFFER
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(frontIndices),frontIndices,GL_STATIC_DRAW);//同样是对buffer进行填充
+经过以上代码，某个图元的顶点位置以及颜色和索引信息就已经放入GPU了，接下来只要在display函数中，调用glDrawElements就可以绘制了
+glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));//由于索引定义的是4个点，因此第一个参数mode是四边形，第二个是索引的size，第三个是索引的数据类型。注意！glDrawElements只接受3种数据类型，当时我因为指定索引类型为GL_INT导致无法绘制被卡住了N长时间，坑人啊！最后一个是指针地址，由于当前绑定的buffer是buffer[2]，因此填0即可。
+最后别忘记了，VBO是需要glew库支持的，所以要记得在头文件中添加
+
+【6】
+著作权归作者所有。
+商业转载请联系作者获得授权，非商业转载请注明出处。
+作者：hoodlum1980
+链接：https://www.zhihu.com/question/30095978/answer/67147426
+来源：知乎
+
+vao，就是顶点数组。绑定，就是指定你当前要操作的对象。（opengl 只有一个当前对象，把它想象成 current object，你的后续操作，都是在对这个 object 进行。你可以拥有很多个 object，然后用 bind 来指定 current object，所以你后面的操作，就不需要点名你在操作谁了）。用绑定，可以随时的在多个 object 之间切换当前对象。genXXXXX，会返回一个整数形式的 ID（handle），这个数是这个对象的 ID，有如身份证号。但是由于我们还没有给这个对象赋实际数据，所以我们可以设想，这类似于像 opengl 声明了这个对象的存在（申领一个 unique id）。好比有了一个箭头，但是箭头另一端没有挂接数据。vao，就是一堆顶点，组成的一个数组。那么我们就得知道这里的顶点是什么，所谓顶点，就是一个点，对每个这样的点，上面挂接了多个数据（通常都是1~4维向量），这些数据成为属性。我们提到具体哪个属性时，用索引值来标识。比如说，坐标，就是顶点的一个必有的属性，通常是第一个属性，所以：顶点.属性[0] --> [x,y,z]；除了坐标，还可以有颜色 [r,g,b], 纹理坐标 [u,v] ，法线方向等。总之，顶点，有多个向量形式的属性，多个顶点，组成一个 va。所以一个 va，想象成就是一个箭头，指向了具有多个格子的指针数组，每一个格子又有一个箭头，指向一堆向量形式的属性（依次属于每个顶点）。对一个 vao，申领了 ID 以后，只是一个悬空的箭头，所以要给这个 vao 设置属性，通常至少要有坐标这个属性。所以需要先创建一个 buffer，把数据传递到 buffer，genBuffer,  给 buffer 申领一个 id，BufferData ，给 buffer 赋值（向 buffer 中拷贝数据）。这一步可能才是（opengl / 显卡）实际分配内存。VertextAttribPoint，把这个 buffer 设置为某个 vao 的某个属性。这样，vao 的某个属性就有了实际数据。
+
+
+当然，这些属性具体是什么含义，主要取决于你怎么（在 shader 中）使用它们。这些属性，在 pipeline 中，送给 vertext shader 作为可使用的输入数据。比如说，vertex shader 中可以用一个4x4 计算出来的矩阵，乘以顶点的属性0，把模型坐标变换到窗口的客户区坐标。所以当你对某个 vao 设置完属性以后，opengl/显卡就已经知道了这些信息，所以除非你需要修改，否则你只需要做一次就够了，然后你可以把它切换成非 current 对象。需要的时候随时可以 bind 到前台使用。当然了，实际存储大量数据和需要较大内存的，是 vbo，也就是 buffer。一个 buffer 被挂接给某个 vao 的某个属性。我们就可以因此知道这个顶点的属性（数据）。当你不需要对象的时候，要记得 delete 。申领的 id，只是交还给系统（标示为可以分配给用户）。对于 buffer，会释放 buffer 占用的内存。
+
+
+VAO是一个状态集，标记的是当前GL_ARRAY_BUFFER Target的数据状态。而单纯的VBO只是一块Data，并没有状态。这句话的意思是，在你的程序中你可以gen N个 VAO，也可以gen N个VBO，但是，起作用的只是你bind到Target上的那一个。glBindVertexArray 为什么没有Target参数，因为Target只有一种。
+
+【7】
+所谓GPU的渲染管线，听起来好像很高深的样子，其实我们可以把它理解为一个流程，就是我们告诉GPU一堆数据，最后得出来一副二维图像，而这些数据就包括了”视点、三维物体、光源、照明模型、纹理”等元素。 
+在各种图形学的书中，渲染管线主要分为三个阶段：应用程序阶段、几何阶段、光栅阶段。 
+
+2，几何阶段。 
+主要负责顶点坐标变换、光照、裁剪、投影以及屏幕映射，改阶段基于GPU进行运算，在该阶段的末端得到了经过变换和投影之后的顶点坐标、颜色、以及纹理坐标。简而言之，几何阶段的主要工作就是“变换三维顶点坐标”和“光照计算”。 
+
+3，光栅化阶段。 
+经过上面的步骤之后，我们得到了每个点的屏幕坐标值，和我们需要绘制的图元，
+给像素赋予颜色的阶段称为Pixel Operation，是在更新帧缓存之前，执行最后一系列针对每个片段的操作，其目的是计算出每个像素的颜色值。在这个阶段，被遮挡的面通过一个被称为深度测试的过程消除。 
+pixel operation包含下面这些流程： 
+（1）消除遮挡面； 
+（2）Texture operation，纹理操作，根据像素的纹理坐标，查询对应的纹理值； 
+（3）Blending，通常称为alpha blending，根据目前已经画好的颜色，与正在计算的颜色的alpha值混合，形成新的颜色。 
+（4）Filtering，将正在计算的颜色经过某种滤镜后输出。 
+该阶段之后，像素的颜色值被写入帧缓存中。 
