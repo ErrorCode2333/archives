@@ -278,3 +278,37 @@ pixel operation包含下面这些流程：
 （3）Blending，通常称为alpha blending，根据目前已经画好的颜色，与正在计算的颜色的alpha值混合，形成新的颜色。 
 （4）Filtering，将正在计算的颜色经过某种滤镜后输出。 
 该阶段之后，像素的颜色值被写入帧缓存中。 
+
+【8】glBindBuffer激活缓冲区，指定当前缓冲对象，从而使接下的操作都是对该对象进行的。GL_ARRAY_BUFFER表示顶点数据，GL_ELEMENT_ARRAY_BUFFER表示索引数据。
+
+
+【9】
+    纹理滤镜
+
+    在纹理映射的过程中，如果图元的大小不等于纹理的大小，OpenGL便会对纹理进行缩放以适应图元的尺寸。我们可以通过设置纹理滤镜来决定OpenGL对某个纹理采用的放大、缩小的算法。
+
+    调用glTexParameter来设置纹理滤镜。如：
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILETER,
+MagFilter);//设置放大滤镜
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, 
+MinFilter); //设置缩小滤镜
+
+   上述调用中，第一个参数表明是针对何种纹理进行设置，第二个参数表示要设置放大滤镜还是缩小滤镜。第三个参数表示使用的滤镜。可以为下面的值之一：
+
+
+   6.4.1 纹理坐标
+
+    要使用当前的纹理绘制图元，我们必须在绘制每个顶点之前为该顶点指定纹理坐标。只需调用
+
+    glTexCoord2d(s:Double;t:Double);
+
+    函数即可。其中，s、t是对于2D纹理而言的s、t坐标。
+
+图6.4-1 纹理坐标
+
+    对于任何纹理，无论纹理的真正大小如何，其顶端（左上角）的纹理坐标恒为(0,0),右下角的纹理坐标恒为(1,1)。也就是说，纹理坐标应是一个介于0到1之间的一个小数。
+
+
+【10】
+DIB意思就是Device-Independent Bitmap(设备无关位图)。

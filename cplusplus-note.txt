@@ -212,3 +212,7 @@ Liskov替换原则（Liskov-Substituion Principle）：子类必须能够替换�
 【35】  char p[]="hello world";和char *p="hello world"的区别；前者存放在栈里，后者存放在静态区。
 【36】栈是向低地址扩展的数据结构，堆是向高地址扩展的数据结构，是不连续的内存区域。
 【37】用数组比用指针速度要快一些，因为指针在底层汇编中需要用edx寄存器中转一下，而数组在栈上直接读取。
+
+【38】
+SrcImageInfoArray *arr = new SrcImageInfoArray;
+SrcImageInfo& info = (*arr)[i];
