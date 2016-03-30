@@ -1,3 +1,6 @@
 CCAffineTransform
 
 batch->m_indices_num = quads_num * 6; // CCRenderMgr.cpp L63
+
+
+加密：cryoto

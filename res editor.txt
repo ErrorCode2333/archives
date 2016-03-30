@@ -1,0 +1,124 @@
+file :
+BasicDefinition.cs
+
+class ESprite
+{      
+	    private const string c_img_src_path = @"assets\image\src";
+        private const string c_img_handle_path = @"assets\image\handle";
+        private const string c_sprite_directory = "sprites";
+        private const string c_subset_directory = "subents";
+        private const string c_main_file_name = "esprite.xml";
+        private const string c_img_res_file_name = "res_image.xml";
+
+        public const int MUTI_CLIP_SIZE = 64;
+        public const int MAX_TEX_SIZE = 512;
+
+        private ZipFile m_inner_zip_file;
+        private FileHeadInfo m_file_head_info = new FileHeadInfo();
+
+        private Dictionary<string, ImageResInfo> m_image_res_info_map = new Dictionary<string, ImageResInfo>();
+        private Dictionary<string, BaseSpriteInfo> m_sprite_info_map = new Dictionary<string, BaseSpriteInfo>();
+        private Dictionary<string, BaseSubEntInfo> m_subent_info_map = new Dictionary<string, BaseSubEntInfo>();
+}
+
+
+    public struct ImageResInfo
+    {
+        public string src_res_path;
+        public string handle_res_path;
+        public string handle_res_alpha_path;
+        public string md5;
+
+        public Size src_img_size;
+        public Size dst_img_size;
+        public Rectangle clip_zone;         // 相对源图的裁剪区域
+    }
+
+
+    public struct BaseSpriteInfo
+    {
+        public string name;                 // sprite名称
+        public bool is_sprite_load;         // 是否已经加载
+
+        public CellDrawMode draw_mode;
+        public FrameLoopType loop_mode;
+        public uint play_time;              // 毫秒
+
+        // 需要查看
+        public Int16 sort_x;
+        public Int16 sort_y;
+        
+        public Point center;                        // 中心点
+        public List<BaseFrameInfo> frame_info_list;
+
+        public SegInfo seg_info;
+    }
+
+    public struct BaseFrameInfo
+    {
+        public short tran_left;
+        public short inv_tran_left;
+        public short tran_top;
+
+        public Color blend_color;
+        public uint custom_frame_time;      // 自定义帧时间
+
+        public int combine_dib_index;       // 整合时用到的dib index
+        public int combine_image_index;
+
+        public string src_res_path;         // 图片相关参数
+        public Size img_size;
+        public float uv_top;
+        public float uv_left;
+        public float uv_bottom;
+        public float uv_right;
+    }
+
+
+    public struct BaseSubEntInfo
+    {
+        public string name;
+        public bool is_subent_load;
+        public List<EmbedSpriteInfo> embed_sprite_list;
+        public List<RefSpriteInfo> ref_sprite_list;
+        public List<EmbedRefSpriteInfo> embed_ref_sprite_list;
+
+
+        public byte use_mode;               // 使用模式(互斥模式,共生模式)
+        public string muti_ref_image_name;  // 大建筑引用的纹理名称
+        public int sprite_width;            // 切分的sprite的宽
+        public int sprite_height;           // 切分的sprite的高
+    }
+
+    public struct EmbedSpriteInfo
+    {
+        public string anim_name;            // 动画名称
+        public bool is_contain_reverse;     // 是否包含反向
+        public string reverse_anim_name;    // 反向动画名称
+        public string ref_sprite_name;      // 引用精灵名称   
+    }
+
+    public struct RefSpriteInfo
+    {
+        public string ref_sprite_anim_name; // 引用的动画名称
+        public string csprite_name;         // 引用的csprite名称
+    }
+
+    public struct EmbedRefSpriteInfo
+    {
+        public string ref_alias_name;         // 引用的csprite名称
+        public string ref_anim_name;            // 引用的动画名称
+    }
+
+
+
+    CreateAllInfoFromSprite(create_info_list, new List<RefSpriteCreateInfo>(),
+                new List<EmbedRefSpriteCreateInfo>(), "UISprite", 0, for_update);
+
+
+    AddImageToResource()  ->m_image_res_info_map
+
+    frameQueueDisplay.ResetAsSprite(sp_info);
+
+    ExportCsprite(string subent_name, string save_path, bool is_shadow, bool is_ui, bool is_tex_per_frame = false)
+

@@ -1,0 +1,20 @@
+最终包格式
+[Header][File Data][File Entries][File names]
+
+插入
+filename -> hashString(filename, Hash_Seed) = nameHash (unsigned long long);
+nameHash & hashMask -> hashIndex;
+fileIndex = hashTable[hashIndex]; (fileIndex 即File Entries的索引) 
+
+(例：
++		m_filenames	[1]("assets/scripts/main.lua")	std::vector<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::allocator<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >
+
+		m_hashMask	255	unsigned int
+
+		nameHash	4105817419679075046	unsigned __int64
+
+		index	230	unsigned int
+
+		entryIndex	0	unsigned int
+
+)
